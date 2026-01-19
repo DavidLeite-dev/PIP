@@ -184,7 +184,7 @@ BookSwap/
 
 ## Autores
 
-Desenvolvido por alunos do IPCA no âmbito da disciplina **Programação Imperativa e Procedimental (PIP)**.
+Desenvolvido por **David Leite**, **Alexandre Sousa**, **Rodrigo Reis** e **Juan Perez**
 
 ---
 
@@ -196,6 +196,6 @@ Este projeto foi desenvolvido para fins académicos.
 
 <div align="center">
 
-**IPCA** • Programação Imperativa e Procedimental • 2025/2026
+**IPCA** • Projeto de Iniciação á Programação • 2025/2026
 
 </div>
