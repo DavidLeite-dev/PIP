@@ -1,0 +1,54 @@
+Codigo de Atividades - Login
+
+@startuml 
+
+start
+
+:Mostrar ecrã de login;
+:Solicitar Email/ID;
+:Ler email;
+:Solicitar Password;
+:Ler password;
+
+if (É Admin?) then (sim)
+    :Buscar dados em admin.txt;
+    :Definir utilizadorLogado = 1;
+    :Copiar nome e email para variáveis globais;
+    :Mostrar "LOGIN ADMINISTRADOR BEM SUCEDIDO";
+    stop
+else (não)
+endif
+
+if (Email está em IPCAlunos.txt?) then (não)
+    :Mostrar "ACESSO NÃO AUTORIZADO";
+    :Mostrar mensagem explicativa;
+    stop
+else (sim)
+endif
+
+:Abrir ficheiro users.txt;
+
+if (Email existe em users.txt?) then (sim)
+    :Desencriptar password armazenada;
+    
+    if (Password correta?) then (sim)
+        :Definir utilizadorLogado = 1;
+        :Copiar nome e email;
+        :Mostrar "LOGIN BEM SUCEDIDO";
+        stop
+    else (não)
+        :Mostrar "PASSWORD INCORRETA";
+        stop
+    endif
+else (não)
+    :Mostrar "PRIMEIRA AUTENTICAÇÃO";
+    :Solicitar Nome completo;
+    :Solicitar nova Password;
+    :Encriptar password;
+    :Adicionar ao users.txt;
+    :Definir utilizadorLogado = 1;
+    :Mostrar "CONTA CRIADA COM SUCESSO";
+    stop
+endif
+
+@enduml

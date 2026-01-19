@@ -1,0 +1,32 @@
+Codigo Estados - Requisição
+
+@startuml Estado_Requisicao
+
+[*] --> Pendente : requisitarLivroEspecifico()
+
+Pendente --> Aceita : ownerAceita()
+Pendente --> Rejeitada : ownerRejeita()
+Pendente --> Cancelada : requesterCancela()
+Pendente --> Rejeitada : livroFicaIndisponivel()
+
+Aceita --> [*] : finalizacao
+Rejeitada --> [*] : finalizacao
+Cancelada --> [*] : finalizacao
+
+note right of Pendente
+  Aguarda resposta
+  do proprietário
+end note
+
+note right of Aceita
+  Livro emprestado
+  fica indisponível
+end note
+
+note bottom of Rejeitada
+  Pode ser rejeitada manualmente
+  ou automaticamente quando o livro
+  é vendido/trocado
+end note
+
+@enduml

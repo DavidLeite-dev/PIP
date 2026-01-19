@@ -1,0 +1,55 @@
+Codigo de Atividades - Pesquisar Livros
+
+@startuml 
+
+start
+
+:Carregar todos os livros de livros.txt;
+
+:Mostrar opções de pesquisa;
+note right
+  1. Por categoria
+  2. Por nome
+  3. Por autor
+  4. Por condição
+end note
+
+:Utilizador escolhe tipo de pesquisa;
+
+switch (Tipo de pesquisa?)
+case (Por categoria)
+    :Extrair categorias únicas dos livros;
+    :Mostrar lista de categorias;
+    :Utilizador seleciona categoria;
+case (Por nome)
+    :Solicitar nome do livro;
+    :Ler termo de pesquisa;
+case (Por autor)
+    :Extrair autores únicos dos livros;
+    :Mostrar lista de autores;
+    :Utilizador seleciona autor;
+case (Por condição)
+    :Extrair condições únicas dos livros;
+    :Mostrar lista de condições;
+    :Utilizador seleciona condição;
+endswitch
+
+:Filtrar livros pelo critério;
+note right: Pesquisa case-insensitive por substring
+
+if (Encontrou livros?) then (não)
+    :Mostrar "NENHUM LIVRO ENCONTRADO";
+else (sim)
+    :Mostrar lista de livros filtrados;
+    :Permitir seleção para ver detalhes;
+    
+    if (Livro disponível?) then (sim)
+        :Mostrar opções: Requisitar / Comprar / Trocar;
+    else (não)
+        :Mostrar "Livro não disponível";
+    endif
+endif
+
+stop
+
+@enduml

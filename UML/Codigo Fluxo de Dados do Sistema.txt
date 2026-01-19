@@ -1,0 +1,50 @@
+Codigo Fluxo de Dados do Sistema
+
+@startuml 
+
+skinparam rectangle {
+    BackgroundColor<<input>> LightBlue
+    BackgroundColor<<process>> LightGreen
+    BackgroundColor<<output>> LightYellow
+    BackgroundColor<<persist>> LightGray
+}
+
+title SISTEMA BOOKSWAP - Fluxo de Dados
+
+rectangle "INPUT" <<input>> as Input {
+    :Comandos do user:
+    :Dados formulário:
+}
+
+rectangle "PROCESSAMENTO" <<process>> as Process {
+    :Autenticação:
+    :Validação:
+    :CRUD Livros:
+    :Transações:
+}
+
+rectangle "OUTPUT" <<output>> as Output {
+    :Ecrãs:
+    :Mensagens:
+    :Listas:
+    :Relatórios:
+}
+
+rectangle "PERSISTÊNCIA" <<persist>> as Persist {
+    database "users.txt" as UsersDB
+    database "admin.txt" as AdminDB
+    database "IPCAlunos.txt" as AlunosDB
+    database "livros.txt" as LivrosDB
+    database "autores.txt" as AutoresDB
+    database "categorias.txt" as CategoriasDB
+    database "requisicoes.txt" as ReqDB
+    database "compras.txt" as ComprasDB
+    database "trocas.txt" as TrocasDB
+}
+
+Input --> Process
+Process --> Output
+Process --> Persist
+Persist --> Process
+
+@enduml

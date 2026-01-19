@@ -1,0 +1,26 @@
+Codigo Estados - Compra
+
+@startuml
+
+[*] --> Pendente : comprarLivroEspecifico()
+
+Pendente --> Confirmada : vendedorAceita()
+Pendente --> Cancelada : vendedorRejeita()
+Pendente --> Cancelada : compradorCancela()
+Pendente --> Cancelada : livroFicaIndisponivel()
+
+Confirmada --> [*] : finalizacao
+Cancelada --> [*] : finalizacao
+
+note right of Pendente
+  Inclui preço proposto
+  Aguarda resposta do vendedor
+end note
+
+note right of Confirmada
+  Posse do livro transferida
+  para o comprador
+  Livro fica indisponível
+end note
+
+@enduml

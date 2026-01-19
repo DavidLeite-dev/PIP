@@ -1,0 +1,145 @@
+Diagrama de Classes
+
+@startuml
+
+skinparam classAttributeIconSize 0
+
+class Utilizador {
+    - nome: char[50]
+    - email: char[50]
+    - password: char[20]
+    + login(): int
+    + logout(): void
+    + registerUser(): void
+    + editarDadosPessoais(): void
+    + atualizarNomeLogado(): void
+}
+
+class Admin {
+    + isAdmin(nome: char*): int
+    + painelAdmin(): void
+    + adminVerTodasTransacoes(): void
+    + adminEstatisticas(): void
+    + adminGerirUtilizadores(): void
+}
+
+class Livro {
+    - titulo: char[100]
+    - autor_id: int
+    - autor: char[100]
+    - owner: char[100]
+    - categoria_id: int
+    - categoria: char[50]
+    - condicao_id: int
+    - condicao: char[20]
+    - disponivel: int
+    + adicionarLivro(): void
+    + consultarLivros(): void
+    + pesquisarLivros(): void
+    + listarMeusLivros(): void
+    + mostrarLivros(livros: Livro*, total: int): void
+    + trocarPosseLivro(): void
+    + atualizarDisponibilidadeLivro(): void
+    + verificarDisponibilidadeLivro(): int
+}
+
+class Requisicao {
+    - id: int
+    - titulo: char[100]
+    - autor: char[100]
+    - requester: char[50]
+    - owner: char[50]
+    - status: char[20]
+    - data: char[20]
+    + requisitarLivroEspecifico(): void
+    + consultarMeusPedidos(): void
+}
+
+class Compra {
+    - id: int
+    - titulo: char[100]
+    - autor: char[100]
+    - comprador: char[50]
+    - vendedor: char[50]
+    - preco: float
+    - data: char[20]
+    - status: char[20]
+    + comprarLivroEspecifico(): void
+    + consultarCompras(): void
+}
+
+class Troca {
+    - id: int
+    - titulo1: char[100]
+    - autor1: char[100]
+    - titulo2: char[100]
+    - autor2: char[100]
+    - user1: char[50]
+    - user2: char[50]
+    - status: char[20]
+    - data: char[20]
+    + trocarLivroEspecifico(): void
+}
+
+class Autor {
+    - id: int
+    - nome: char[100]
+    + obter_id_autor(autor: char*): int
+    + traduzir_autor(id: int): char*
+}
+
+class Categoria {
+    - id: int
+    - nome: char[50]
+    + obter_id_categoria(categoria: char*): int
+    + traduzir_categoria(id: int): char*
+}
+
+class MenuInicial {
+    + mostrarMenuInicial(): void
+}
+
+class MenuPrincipal {
+    + menu_principal(nome: char*): void
+    + menuTransacoesUsuario(): void
+}
+
+class Util {
+    + limparBuffer(): void
+    + limparEcra(): void
+    + pausar(): void
+    + opcaoInvalida(): void
+    + linha_h_topo(): void
+    + linha_h_meio(): void
+    + linha_h_fim(): void
+    + texto_centrado(formato: char*, ...): void
+    + texto_esquerda(formato: char*, ...): void
+    + garantir_utf8(texto: char*, tamanho: size_t): void
+    + ler_int_intervalo(destino: int*, min: int, max: int): int
+    + ler_float_intervalo(destino: float*, min: float, max: float): int
+    + menu_paginar_itens(): int
+    + traduzir_condicao(condicao: int): char*
+    + verificarRequisitosAmbiente(): int
+}
+
+' Relações
+Admin --|> Utilizador : herda
+
+Utilizador "1" -- "*" Livro : possui
+Utilizador "1" -- "*" Requisicao : faz/recebe
+Utilizador "1" -- "*" Compra : faz/recebe
+Utilizador "1" -- "*" Troca : faz/recebe
+
+Livro "*" -- "1" Autor : escrito por
+Livro "*" -- "1" Categoria : pertence a
+Livro "1" -- "*" Requisicao : é requisitado
+Livro "1" -- "*" Compra : é comprado
+Livro "*" -- "*" Troca : é trocado
+
+MenuInicial ..> Utilizador : usa
+MenuPrincipal ..> Livro : usa
+MenuPrincipal ..> Requisicao : usa
+MenuPrincipal ..> Compra : usa
+MenuPrincipal ..> Troca : usa
+
+@enduml

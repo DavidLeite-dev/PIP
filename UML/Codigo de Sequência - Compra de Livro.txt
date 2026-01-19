@@ -1,0 +1,41 @@
+Codigo de Sequência - Compra de Livro
+
+@startuml 
+
+actor Comprador
+actor Vendedor
+participant "Sistema" as S
+database "compras.txt" as FC
+database "livros.txt" as FL
+
+== Proposta de Compra ==
+
+Comprador -> S : comprarLivroEspecifico(titulo, autor, vendedor)
+S -> FL : verificarDisponibilidadeLivro()
+FL --> S : disponivel = true
+
+Comprador -> S : inserir preço
+S -> FC : registar compra (status=Pendente)
+S --> Comprador : "Proposta registada"
+
+== Resposta do Vendedor ==
+
+Vendedor -> S : menuTransacoesUsuario()
+S -> FC : carregar pedidos pendentes
+S --> Vendedor : mostrar pedidos
+
+Vendedor -> S : selecionar compra
+Vendedor -> S : Aceitar
+
+S -> FL : verificarDisponibilidadeLivro()
+FL --> S : disponivel = true
+
+S -> FC : atualizar status = "Confirmada"
+S -> S : cancelar_pendentes_por_livro()
+S -> FL : trocarPosseLivro(vendedor -> comprador)
+S -> FL : atualizarDisponibilidadeLivro(disponivel=0)
+
+S --> Vendedor : "COMPRA CONFIRMADA"
+S --> Comprador : (livro transferido)
+
+@enduml

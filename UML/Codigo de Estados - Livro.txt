@@ -1,0 +1,35 @@
+Codigo de Estados - Livro
+
+plantuml
+@startuml Estado_Livro
+
+[*] --> Registado : adicionarLivro()
+
+state Registado {
+    [*] --> Disponivel
+    
+    Disponivel --> Indisponivel : alterarDisponibilidade(0)
+    Disponivel --> Indisponivel : requisicaoAceita()
+    Disponivel --> Indisponivel : compraConfirmada()
+    Disponivel --> Indisponivel : trocaAceita()
+    
+    Indisponivel --> Disponivel : alterarDisponibilidade(1)
+    Indisponivel --> Disponivel : devolucao()
+}
+
+Registado --> Eliminado : eliminarLivro()
+Eliminado --> [*]
+
+note right of Disponivel
+  Livro pode ser:
+  - Requisitado
+  - Comprado
+  - Trocado
+end note
+
+note right of Indisponivel
+  Livro não aceita
+  novas transações
+end note
+
+@enduml

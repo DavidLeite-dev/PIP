@@ -1,0 +1,81 @@
+Codigo de Componentes
+
+@startuml 
+
+package "Interface" {
+    [main.c] as Main
+    [menu_inicial.c] as MenuInicial
+    [menu.c] as Menu
+}
+
+package "Gestão de Utilizadores" {
+    [users.c] as Users
+    [admin.c] as Admin
+    [editar_dados.c] as EditarDados
+}
+
+package "Gestão de Livros" {
+    [livros.c] as Livros
+    [transacoes.c] as Transacoes
+}
+
+package "Utilitários" {
+    [util.c] as Util
+}
+
+package "Dados (Ficheiros .txt)" {
+    database "users.txt" as UsersDB
+    database "admin.txt" as AdminDB
+    database "IPCAlunos.txt" as AlunosDB
+    database "livros.txt" as LivrosDB
+    database "requisicoes.txt" as ReqDB
+    database "compras.txt" as CompDB
+    database "trocas.txt" as TrocasDB
+    database "autores.txt" as AutoresDB
+    database "categorias.txt" as CategoriasDB
+}
+
+' Dependências Interface
+Main --> MenuInicial
+Main --> Menu
+Main --> Users
+Main --> Util
+
+MenuInicial --> Users
+MenuInicial --> Menu
+MenuInicial --> Admin
+
+Menu --> Users
+Menu --> EditarDados
+Menu --> Livros
+Menu --> Transacoes
+Menu --> Admin
+
+' Dependências Utilizadores
+Users --> Util
+Users ..> UsersDB : lê/escreve
+Users ..> AdminDB : lê
+Users ..> AlunosDB : lê
+
+Admin --> Livros
+Admin --> Transacoes
+Admin ..> UsersDB : lê/escreve
+Admin ..> AdminDB : lê
+
+EditarDados --> Users
+EditarDados ..> UsersDB : lê/escreve
+
+' Dependências Livros
+Livros --> Util
+Livros --> Transacoes
+Livros ..> LivrosDB : lê/escreve
+Livros ..> AutoresDB : lê/escreve
+Livros ..> CategoriasDB : lê
+
+Transacoes --> Livros
+Transacoes --> Util
+Transacoes ..> ReqDB : lê/escreve
+Transacoes ..> CompDB : lê/escreve
+Transacoes ..> TrocasDB : lê/escreve
+
+@enduml

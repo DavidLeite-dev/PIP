@@ -1,0 +1,57 @@
+Codigo de Atividades - Adicionar Livro
+
+@startuml 
+
+start
+
+:Abrir ficheiro livros.txt;
+:Mostrar cabeçalho "ADICIONAR NOVO LIVRO";
+
+repeat
+    :Solicitar Título;
+    :Ler título;
+    if (Contém ponto e vírgula?) then (sim)
+        :Mostrar aviso;
+    else (não)
+    endif
+repeat while (Título inválido?) is (sim)
+-> não;
+
+:Mostrar lista de Autores;
+:Solicitar seleção ou novo autor;
+
+if (Opção 0 - Novo autor?) then (sim)
+    :Ler nome do novo autor;
+    :Guardar em autores.txt;
+    :Obter ID do novo autor;
+else (não)
+    :Selecionar autor existente;
+endif
+
+:Mostrar lista de Categorias;
+:Solicitar seleção de categoria;
+:Guardar categoria selecionada;
+
+:Definir owner = utilizador logado;
+
+:Mostrar resumo do livro;
+:Solicitar condição (1-Novo, 2-Bom, 3-Razoável);
+:Ler condição;
+
+:Definir disponivel = 1;
+
+:Solicitar confirmação (s/n);
+:Ler confirmação;
+
+if (Confirmado?) then (sim)
+    :Escrever livro em livros.txt;
+    :Mostrar "LIVRO ADICIONADO COM SUCESSO";
+else (não)
+    :Mostrar "ADIÇÃO DE LIVRO CANCELADA";
+endif
+
+:Fechar ficheiro;
+
+stop
+
+@enduml

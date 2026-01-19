@@ -1,0 +1,50 @@
+Codigo de Sequência - Troca de Livros
+
+@startuml 
+
+actor User1
+actor User2
+participant "Sistema" as S
+database "trocas.txt" as FT
+database "livros.txt" as FL
+
+== Proposta de Troca ==
+
+User1 -> S : trocarLivroEspecifico(titulo2, autor2, user2)
+S -> FL : verificarDisponibilidadeLivro(livro2)
+FL --> S : disponivel = true
+
+S -> FL : carregar livros de User1
+S --> User1 : mostrar meus livros
+User1 -> S : selecionar livro1 para trocar
+
+S -> FT : registar troca (status=Pendente)
+S --> User1 : "TROCA PROPOSTA COM SUCESSO"
+
+== Resposta do User2 ==
+
+User2 -> S : menuTransacoesUsuario()
+S -> FT : carregar pedidos pendentes
+S --> User2 : mostrar pedidos
+
+User2 -> S : selecionar troca
+User2 -> S : Aceitar
+
+S -> FL : verificarDisponibilidadeLivro(livro1)
+FL --> S : disponivel = true
+S -> FL : verificarDisponibilidadeLivro(livro2)
+FL --> S : disponivel = true
+
+S -> FT : atualizar status = "Aceita"
+S -> S : cancelar_pendentes_por_livro(livro1)
+S -> S : cancelar_pendentes_por_livro(livro2)
+
+S -> FL : trocarPosseLivro(livro1: user1 -> user2)
+S -> FL : atualizarDisponibilidadeLivro(livro1, disponivel=0)
+
+S -> FL : trocarPosseLivro(livro2: user2 -> user1)
+S -> FL : atualizarDisponibilidadeLivro(livro2, disponivel=0)
+
+S --> User2 : "TROCA ACEITA"
+
+@enduml

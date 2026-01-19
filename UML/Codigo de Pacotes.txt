@@ -1,0 +1,55 @@
+Codigo de Pacotes
+
+
+@startuml
+
+package "BookSwap" {
+
+    package "visual" {
+
+        package "ecras" {
+
+            package "menu" {
+                [MenuInicial]
+                [MenuPrincipal]
+            }
+
+            package "user" {
+                [Users]
+                [Admin]
+                [EditarDados]
+            }
+
+            package "livros" {
+                [Livros]
+                [Transacoes]
+            }
+        }
+
+        [Main]
+    }
+
+    package "util" {
+        [Util]
+    }
+
+    package "dados" <<database>> {
+        [TextFiles]
+    }
+}
+
+' Dependências
+visual.Main ..> visual.ecras.menu
+visual.Main ..> visual.ecras.user
+visual.Main ..> util
+
+visual.ecras.menu ..> visual.ecras.user
+visual.ecras.menu ..> visual.ecras.livros
+
+visual.ecras.user ..> util
+visual.ecras.livros ..> util
+visual.ecras.livros ..> visual.ecras.user
+
+visual.ecras ..> dados : persiste
+
+@enduml

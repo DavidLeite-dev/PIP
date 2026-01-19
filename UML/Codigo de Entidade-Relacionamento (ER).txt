@@ -1,0 +1,86 @@
+Codigo de Entidade-Relacionamento (ER)
+
+@startuml 
+
+entity "Utilizador" as user {
+    * nome : VARCHAR(50)
+    --
+    * email : VARCHAR(50) <<PK>>
+    password_encrypted : VARCHAR(40)
+    is_admin : BOOLEAN
+}
+
+entity "Livro" as book {
+    * titulo : VARCHAR(100)
+    --
+    * autor_id : INTEGER <<FK>>
+    * owner : VARCHAR(100) <<FK>>
+    * categoria_id : INTEGER <<FK>>
+    condicao_id : INTEGER
+    disponivel : BOOLEAN
+}
+
+entity "Autor" as author {
+    * id : INTEGER <<PK>>
+    --
+    nome : VARCHAR(100)
+}
+
+entity "Categoria" as category {
+    * id : INTEGER <<PK>>
+    --
+    nome : VARCHAR(50)
+}
+
+entity "Requisicao" as request {
+    * id : INTEGER <<PK>>
+    --
+    * titulo : VARCHAR(100) <<FK>>
+    * autor : VARCHAR(100)
+    * requester : VARCHAR(50) <<FK>>
+    * owner : VARCHAR(50) <<FK>>
+    status : VARCHAR(20)
+    data : DATE
+}
+
+entity "Compra" as purchase {
+    * id : INTEGER <<PK>>
+    --
+    * titulo : VARCHAR(100) <<FK>>
+    * autor : VARCHAR(100)
+    * comprador : VARCHAR(50) <<FK>>
+    * vendedor : VARCHAR(50) <<FK>>
+    preco : FLOAT
+    data : DATE
+    status : VARCHAR(20)
+}
+
+entity "Troca" as exchange {
+    * id : INTEGER <<PK>>
+    --
+    * titulo1 : VARCHAR(100)
+    * autor1 : VARCHAR(100)
+    * titulo2 : VARCHAR(100)
+    * autor2 : VARCHAR(100)
+    * user1 : VARCHAR(50) <<FK>>
+    * user2 : VARCHAR(50) <<FK>>
+    status : VARCHAR(20)
+    data : DATE
+}
+
+user ||--o{ book : "possui"
+user ||--o{ request : "faz (requester)"
+user ||--o{ request : "recebe (owner)"
+user ||--o{ purchase : "faz (comprador)"
+user ||--o{ purchase : "recebe (vendedor)"
+user ||--o{ exchange : "propõe (user1)"
+user ||--o{ exchange : "recebe (user2)"
+
+book }o--|| author : "escrito por"
+book }o--|| category : "pertence a"
+
+book ||--o{ request : "é requisitado"
+book ||--o{ purchase : "é comprado"
+book }o--o{ exchange : "é trocado"
+
+@enduml

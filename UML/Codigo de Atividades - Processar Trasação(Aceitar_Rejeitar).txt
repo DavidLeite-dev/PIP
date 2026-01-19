@@ -1,0 +1,72 @@
+Codigo de Atividades - Processar Transação (Aceitar/Rejeitar)
+
+@startuml
+
+start
+
+:Carregar pedidos pendentes;
+note right: requisicoes.txt, compras.txt, trocas.txt
+
+:Filtrar pedidos onde sou destinatário;
+:Mostrar lista de pedidos pendentes;
+
+if (Existem pedidos?) then (não)
+    :Mostrar "Nenhum pedido pendente";
+    stop
+else (sim)
+endif
+
+:Utilizador seleciona pedido;
+:Mostrar opções: Aceitar / Recusar / Cancelar;
+:Utilizador escolhe opção;
+
+switch (Opção escolhida?)
+case (Aceitar)
+    :Verificar disponibilidade do livro;
+    
+    if (Livro disponível?) then (não)
+        :Mostrar "NÃO É POSSÍVEL ACEITAR";
+        stop
+    else (sim)
+    endif
+    
+    switch (Tipo de transação?)
+    case (Requisição)
+        :Atualizar status para "Aceita";
+        :Marcar livro como indisponível;
+        :Mostrar "REQUISIÇÃO ACEITA";
+    case (Compra)
+        :Atualizar status para "Confirmada";
+        :Cancelar outras transações pendentes do livro;
+        :Transferir posse do livro para comprador;
+        :Marcar livro como indisponível;
+        :Mostrar "COMPRA CONFIRMADA";
+    case (Troca)
+        :Atualizar status para "Aceita";
+        :Cancelar transações pendentes de ambos livros;
+        :Transferir posse do livro1 para user2;
+        :Transferir posse do livro2 para user1;
+        :Marcar ambos livros como indisponíveis;
+        :Mostrar "TROCA ACEITA";
+    endswitch
+    
+case (Recusar)
+    switch (Tipo de transação?)
+    case (Requisição)
+        :Atualizar status para "Rejeitada";
+        :Mostrar "REQUISIÇÃO REJEITADA";
+    case (Compra)
+        :Atualizar status para "Cancelada";
+        :Mostrar "COMPRA CANCELADA";
+    case (Troca)
+        :Atualizar status para "Rejeitada";
+        :Mostrar "TROCA REJEITADA";
+    endswitch
+    
+case (Cancelar)
+    :Voltar ao menu;
+endswitch
+
+stop
+
+@enduml

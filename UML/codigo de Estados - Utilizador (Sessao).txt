@@ -1,0 +1,33 @@
+codigo de Estados - Utilizador (Sessão)
+
+
+@startuml
+
+[*] --> NaoLogado
+
+NaoLogado --> Logado : login() [credenciaisValidas]
+NaoLogado --> NaoLogado : login() [credenciaisInvalidas]
+NaoLogado --> NaoLogado : registerUser()
+
+Logado --> NaoLogado : logout()
+Logado --> Terminado : sair()
+
+NaoLogado --> Terminado : sair()
+
+Terminado --> [*]
+
+state Logado {
+    [*] --> MenuPrincipal
+    
+    MenuPrincipal --> GestaoLivros : opcao 1,2,3
+    MenuPrincipal --> GestaoTransacoes : opcao 4,5
+    MenuPrincipal --> EditarDados : opcao 6
+    MenuPrincipal --> PainelAdmin : opcao 7 [isAdmin]
+    
+    GestaoLivros --> MenuPrincipal : voltar
+    GestaoTransacoes --> MenuPrincipal : voltar
+    EditarDados --> MenuPrincipal : voltar
+    PainelAdmin --> MenuPrincipal : voltar
+}
+
+@enduml
