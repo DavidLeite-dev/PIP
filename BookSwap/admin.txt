@@ -1,0 +1,2 @@
+admin;admin@ipca.pt;28342E285C010006
+admin2;admin2@ipca.pt;28342E285C040703

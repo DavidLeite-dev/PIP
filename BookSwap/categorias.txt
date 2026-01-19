@@ -1,0 +1,10 @@
+1;Tecnologia
+2;Ficção
+3;Clássicos
+4;Fantasia
+5;Romance
+6;Thriller
+7;História
+8;Biografias
+9;Autoajuda
+10;Infantil

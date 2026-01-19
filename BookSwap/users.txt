@@ -1,0 +1,10 @@
+Ana Ribeiro;a20001@alunos.ipca.pt;283E227302000204
+Bruno Silva;a20002@alunos.ipca.pt;2B22362F5D0202056357
+Carla Mendes;a20003@alunos.ipca.pt;2A31312D530202056356
+Diogo Pereira;a20004@alunos.ipca.pt;2D392C265D0202056351
+Eva Martins;a20005@alunos.ipca.pt;2C26227302000200
+Filipe Costa;a20006@alunos.ipca.pt;2F392F2842550005635555
+Gabriela Sousa;a20007@alunos.ipca.pt;2E3121280000020564
+Hugo Almeida;a20008@alunos.ipca.pt;2125242E000002056B
+Inês Carvalho;a20009@alunos.ipca.pt;203E2632000002056A
+João Teixeira;a20010@alunos.ipca.pt;233F222E0000020463

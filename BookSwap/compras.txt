@@ -1,0 +1,2 @@
+1;Clean Code;Robert C. Martin;Bruno Silva;Ana Ribeiro;12.50;19/01/2026;Pendente
+2;Clean Code;Robert C. Martin;Carla Mendes;Ana Ribeiro;11.00;19/01/2026;Pendente

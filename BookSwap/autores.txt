@@ -1,0 +1,31 @@
+1;Robert C. Martin
+2;Martin Fowler
+3;Andrew Hunt
+4;Erich Gamma
+5;Cormen
+6;Tanenbaum
+7;George Orwell
+8;José Saramago
+9;Eça de Queirós
+10;Paulo Coelho
+11;J.K. Rowling
+12;J.R.R. Tolkien
+13;Agatha Christie
+14;Stephen King
+15;Yuval Noah Harari
+16;Walter Isaacson
+17;James Clear
+18;Carol Dweck
+19;Dan Brown
+20;Jane Austen
+21;Gabriel García Márquez
+22;Machado de Assis
+23;Umberto Eco
+24;Sun Tzu
+25;Anne Frank
+26;Franz Kafka
+27;Fiódor Dostoiévski
+28;Dante Alighieri
+29;John Green
+30;Graciliano Ramos
+31;Jorge Amado
