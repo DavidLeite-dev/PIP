@@ -5,7 +5,7 @@
 #include "util.h"
 #include <stdio.h>
 
-void mostrarMenuInicial(void) {
+void mostrarMenuInicial(UserSession *session) {
     limparEcra();
     int opcao;
 
@@ -24,18 +24,18 @@ void mostrarMenuInicial(void) {
     }
 
     switch (opcao) {
-        case 1: registerUser(); break;
+        case 1: registerUser(session); break;
         case 2:
             {
-                int resultadoLogin = login();
+                int resultadoLogin = login(session);
                 if (resultadoLogin == 2 || resultadoLogin == 1) {
-                    menu_principal(f_nome);
+                    menu_principal(session);
                 }
             }
             break;
         case 0:
             printf("\nObrigado por utilizar o sistema. Até breve!\n");
-            utilizadorLogado = -1;
+            session->logado = -1;
             break;
         default:
             opcaoInvalida();

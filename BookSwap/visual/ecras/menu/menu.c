@@ -7,15 +7,15 @@
 #include "../../../util/util.h"
 #include <stdio.h>
 
-void menu_principal(const char *nome_utilizador) {
+void menu_principal(UserSession *session) {
     limparEcra();
-    atualizarNomeLogado();
+    atualizarNomeLogado(session);
     int opcao;
 
     linha_h_topo();
     texto_centrado("MENU PRINCIPAL");
     linha_h_meio();
-    texto_esquerda("Utilizador: %s", nome_utilizador);
+    texto_esquerda("Utilizador: %s", session->nome);
     linha_h_meio();
     texto_esquerda("1. Consultar catálogo de livros");
     texto_esquerda("2. Registar livro");
@@ -23,7 +23,7 @@ void menu_principal(const char *nome_utilizador) {
     texto_esquerda("4. Consultar os meus pedidos");
     texto_esquerda("5. Transações  ");
     texto_esquerda("6. Alterar dados pessoais");
-    if (isAdmin(nome_utilizador)) {
+    if (isAdmin(session->nome)) {
         texto_esquerda("7. [ADMIN] Painel de Administração");
     }
 
@@ -40,18 +40,18 @@ void menu_principal(const char *nome_utilizador) {
     }
 
     switch (opcao) {
-        case 1: limparEcra(); consultarLivros(); break;
-        case 2: limparEcra(); adicionarLivro(); break;
-        case 3: limparEcra(); listarMeusLivros(); break;
-        case 4: limparEcra(); consultarMeusPedidos(); break;
-        case 5: limparEcra(); menuTransacoesUsuario(); break;
-        case 6: limparEcra(); editarDadosPessoais(); break;
-        case 7: limparEcra(); painelAdmin(); break;
-        case 9: logout(); break;
+        case 1: limparEcra(); consultarLivros(session->nome); break;
+        case 2: limparEcra(); adicionarLivro(session->nome); break;
+        case 3: limparEcra(); listarMeusLivros(session->nome); break;
+        case 4: limparEcra(); consultarMeusPedidos(session->nome); break;
+        case 5: limparEcra(); menuTransacoesUsuario(session->nome); break;
+        case 6: limparEcra(); editarDadosPessoais(session); break;
+        case 7: limparEcra(); painelAdmin(session->nome); break;
+        case 9: logout(session); break;
         case 0:
             limparEcra();
             printf("Obrigado por utilizar o sistema. Até breve!\n");
-            utilizadorLogado = -1;
+            session->logado = -1;
             break;
         default:
             opcaoInvalida();

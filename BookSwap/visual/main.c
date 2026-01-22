@@ -19,11 +19,13 @@ int main(void) {
     /* Normalizar users.txt uma vez ao arrancar (cria users.bak) */
     normalizeUsersFile();
 
-    while (utilizadorLogado >= 0) {
-        if (utilizadorLogado == 0) {
-            mostrarMenuInicial();
+    UserSession session = {0, "", ""};
+
+    while (session.logado >= 0) {
+        if (session.logado == 0) {
+            mostrarMenuInicial(&session);
         } else {
-            menu_principal(f_nome);
+            menu_principal(&session);
         }
     }
     return 0;

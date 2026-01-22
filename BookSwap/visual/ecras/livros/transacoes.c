@@ -8,7 +8,18 @@
 #include "livros.h"
 #include "../user/users.h"
 
-extern char f_nome[MAX_NOME];
+typedef struct {
+    int id;
+    char tipo[20];
+    char titulo[MAX_TITULO];
+    char autor[MAX_AUTOR];
+    char outro_user[MAX_NOME];
+    char status[MAX_STATUS];
+    char data[MAX_DATA];
+    float preco;
+    char titulo2[MAX_TITULO];
+    char autor2[MAX_AUTOR];
+} PedidoUnificado;
 
 static void cancelar_pendentes_por_livro(const char *titulo, const char *autor, const char *owner,
                                         int compraAceiteId, int trocaAceiteId) {
@@ -160,7 +171,7 @@ int obterProximoIdTroca(void) {
     return id;
 }
 
-void requisitarLivroEspecifico(char *titulo, char *autor, char *owner) {
+void requisitarLivroEspecifico(const char *nome_user, char *titulo, char *autor, char *owner) {
     // Verificar se o livro está disponível
     if (!verificarDisponibilidadeLivro(titulo, autor, owner)) {
         limparEcra();
@@ -177,23 +188,10 @@ void requisitarLivroEspecifico(char *titulo, char *autor, char *owner) {
         char data[MAX_DATA];
         obterDataAtual(data);
         int id = obterProximoIdRequisicao();
-        fprintf(fp, "%d;%s;%s;%s;%s;Pendente;%s\n", id, titulo, autor, f_nome, owner, data);
+        fprintf(fp, "%d;%s;%s;%s;%s;Pendente;%s\n", id, titulo, autor, nome_user, owner, data);
         fclose(fp);
     }
 }
-
-typedef struct {
-    int id;
-    char tipo[20];
-    char titulo[MAX_TITULO];
-    char autor[MAX_AUTOR];
-    char outro_user[MAX_NOME];
-    char status[MAX_STATUS];
-    char data[MAX_DATA];
-    float preco;
-    char titulo2[MAX_TITULO];
-    char autor2[MAX_AUTOR];
-} PedidoUnificado;
 
 static int formatar_pedido_unificado(char *buffer, size_t bufferSize, int index, void *item, void *context) {
     (void)index;
@@ -227,7 +225,7 @@ static void header_consultar_meus_pedidos(int paginaAtual, int totalPaginas, voi
     linha_h_meio();
 }
 
-void consultarMeusPedidos(void) {
+void consultarMeusPedidos(const char *nome_user) {
     PedidoUnificado *pedidos = NULL;
     int total_pedidos = 0, capacidade = 10;
     pedidos = malloc((size_t)capacidade * sizeof(PedidoUnificado));
@@ -246,7 +244,7 @@ void consultarMeusPedidos(void) {
             sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", 
                    &r.id, r.titulo, r.autor, r.requester, r.owner, r.status, r.data);
             
-            if (strcmp(r.requester, f_nome) == 0) {
+            if (strcmp(r.requester, nome_user) == 0) {
                 if (total_pedidos == capacidade) {
                     capacidade *= 2;
                     PedidoUnificado *tmp = realloc(pedidos, (size_t)capacidade * sizeof(PedidoUnificado));
@@ -277,7 +275,7 @@ void consultarMeusPedidos(void) {
             sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%f;%[^;];%[^\n]", 
                    &c.id, c.titulo, c.autor, c.comprador, c.vendedor, &c.preco, c.data, c.status);
             
-            if (strcmp(c.comprador, f_nome) == 0) {
+            if (strcmp(c.comprador, nome_user) == 0) {
                 if (total_pedidos == capacidade) {
                     capacidade *= 2;
                     PedidoUnificado *tmp = realloc(pedidos, (size_t)capacidade * sizeof(PedidoUnificado));
@@ -308,7 +306,7 @@ void consultarMeusPedidos(void) {
             sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", 
                    &t.id, t.titulo1, t.autor1, t.titulo2, t.autor2, t.user1, t.user2, t.status, t.data);
             
-            if (strcmp(t.user1, f_nome) == 0) {
+            if (strcmp(t.user1, nome_user) == 0) {
                 if (total_pedidos == capacidade) {
                     capacidade *= 2;
                     PedidoUnificado *tmp = realloc(pedidos, (size_t)capacidade * sizeof(PedidoUnificado));
@@ -448,7 +446,7 @@ void consultarMeusPedidos(void) {
                 pausar();
 
                 free(pedidos);
-                consultarMeusPedidos();
+                consultarMeusPedidos(nome_user);
                 return;
             }
         } else {
@@ -463,7 +461,7 @@ void consultarMeusPedidos(void) {
     free(pedidos);
 }
 
-void comprarLivroEspecifico(char *titulo, char *autor, char *vendedor) {
+void comprarLivroEspecifico(const char *nome_user, char *titulo, char *autor, char *vendedor) {
     // Verificar se o livro está disponível
     if (!verificarDisponibilidadeLivro(titulo, autor, vendedor)) {
         limparEcra();
@@ -499,12 +497,12 @@ void comprarLivroEspecifico(char *titulo, char *autor, char *vendedor) {
         char data[MAX_DATA];
         obterDataAtual(data);
         int id = obterProximoIdCompra();
-        fprintf(fp, "%d;%s;%s;%s;%s;%.2f;%s;Pendente\n", id, titulo, autor, f_nome, vendedor, preco, data);
+        fprintf(fp, "%d;%s;%s;%s;%s;%.2f;%s;Pendente\n", id, titulo, autor, nome_user, vendedor, preco, data);
         fclose(fp);
     }
 }
 
-void trocarLivroEspecifico(char *titulo, char *autor, char *owner) {
+void trocarLivroEspecifico(const char *nome_user, char *titulo, char *autor, char *owner) {
     // Verificar se o livro está disponível
     if (!verificarDisponibilidadeLivro(titulo, autor, owner)) {
         limparEcra();
@@ -538,7 +536,7 @@ void trocarLivroEspecifico(char *titulo, char *autor, char *owner) {
             continue;
         }
         
-        if (strcmp(livro_temp.owner, f_nome) == 0) {
+        if (strcmp(livro_temp.owner, nome_user) == 0) {
             if (nmeus == capmeus) {
                 capmeus *= 2;
                 Livro *tmp = realloc(meus_livros, (size_t)capmeus * sizeof(Livro));
@@ -593,7 +591,7 @@ void trocarLivroEspecifico(char *titulo, char *autor, char *owner) {
         char data[MAX_DATA];
         obterDataAtual(data);
         int id = obterProximoIdTroca();
-        fprintf(fp, "%d;%s;%s;%s;%s;%s;%s;Pendente;%s\n", id, meus_livros[escolha - 1].titulo, meus_livros[escolha - 1].autor, titulo, autor, f_nome, owner, data);
+        fprintf(fp, "%d;%s;%s;%s;%s;%s;%s;Pendente;%s\n", id, meus_livros[escolha - 1].titulo, meus_livros[escolha - 1].autor, titulo, autor, nome_user, owner, data);
         fclose(fp);
 
         limparEcra();
@@ -605,7 +603,7 @@ void trocarLivroEspecifico(char *titulo, char *autor, char *owner) {
     free(meus_livros);
 }
 
-void menuTransacoesUsuario(void) {
+void menuTransacoesUsuario(const char *nome_user) {
     // Carregar requisições recebidas (onde sou owner)
     FILE *fr = fopen("requisicoes.txt", "r");
     Requisicao *reqs = NULL; int nreq = 0, capreq = 10; char linhar[500];
@@ -662,7 +660,7 @@ void menuTransacoesUsuario(void) {
     // Requisições pendentes
     if (reqs) {
         for (int i = 0; i < nreq; i++) {
-            if (strcmp(reqs[i].owner, f_nome) == 0 && strcmp(reqs[i].status, "Pendente") == 0) {
+            if (strcmp(reqs[i].owner, nome_user) == 0 && strcmp(reqs[i].status, "Pendente") == 0) {
                 if (npedidos == cappedidos) { cappedidos*=2; PedidoPendente *tmp=realloc(pedidos, (size_t)cappedidos*sizeof(PedidoPendente)); if(!tmp)break; pedidos=tmp; }
                 pedidos[npedidos].tipo = 0;
                 pedidos[npedidos].id = reqs[i].id;
@@ -675,7 +673,7 @@ void menuTransacoesUsuario(void) {
     // Compras pendentes
     if (comps) {
         for (int i = 0; i < ncomp; i++) {
-            if (strcmp(comps[i].vendedor, f_nome) == 0 && strcmp(comps[i].status, "Pendente") == 0) {
+            if (strcmp(comps[i].vendedor, nome_user) == 0 && strcmp(comps[i].status, "Pendente") == 0) {
                 if (npedidos == cappedidos) { cappedidos*=2; PedidoPendente *tmp=realloc(pedidos, (size_t)cappedidos*sizeof(PedidoPendente)); if(!tmp)break; pedidos=tmp; }
                 pedidos[npedidos].tipo = 1;
                 pedidos[npedidos].id = comps[i].id;
@@ -688,7 +686,7 @@ void menuTransacoesUsuario(void) {
     // Trocas pendentes
     if (trocas) {
         for (int i = 0; i < nt; i++) {
-            if (strcmp(trocas[i].user2, f_nome) == 0 && strcmp(trocas[i].status, "Pendente") == 0) {
+            if (strcmp(trocas[i].user2, nome_user) == 0 && strcmp(trocas[i].status, "Pendente") == 0) {
                 if (npedidos == cappedidos) { cappedidos*=2; PedidoPendente *tmp=realloc(pedidos, (size_t)cappedidos*sizeof(PedidoPendente)); if(!tmp)break; pedidos=tmp; }
                 pedidos[npedidos].tipo = 2;
                 pedidos[npedidos].id = trocas[i].id;
@@ -758,7 +756,7 @@ void menuTransacoesUsuario(void) {
                     while (fgets(linha_chk, sizeof linha_chk, fchk)) {
                         Requisicao r;
                         sscanf(linha_chk, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", &r.id, r.titulo, r.autor, r.requester, r.owner, r.status, r.data);
-                        if (r.id == id_escolhido && strcmp(r.owner, f_nome) == 0) {
+                        if (r.id == id_escolhido && strcmp(r.owner, nome_user) == 0) {
                             req_chk = r;
                             found_chk = 1;
                             break;
@@ -800,7 +798,7 @@ void menuTransacoesUsuario(void) {
                 while (fgets(linha, sizeof linha, f)) {
                     Requisicao r;
                     sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", &r.id, r.titulo, r.autor, r.requester, r.owner, r.status, r.data);
-                    if (r.id == id_escolhido && strcmp(r.owner, f_nome) == 0) {
+                    if (r.id == id_escolhido && strcmp(r.owner, nome_user) == 0) {
                         fprintf(tmp, "%d;%s;%s;%s;%s;Aceita;%s\n", r.id, r.titulo, r.autor, r.requester, r.owner, r.data);
                         req_aceita = r;
                         found = 1;
@@ -832,7 +830,7 @@ void menuTransacoesUsuario(void) {
                     while (fgets(linha_chk, sizeof linha_chk, fchk)) {
                         Compra c;
                         sscanf(linha_chk, "%d;%[^;];%[^;];%[^;];%[^;];%f;%[^;];%[^\n]", &c.id, c.titulo, c.autor, c.comprador, c.vendedor, &c.preco, c.data, c.status);
-                        if (c.id == id_escolhido && strcmp(c.vendedor, f_nome) == 0) {
+                        if (c.id == id_escolhido && strcmp(c.vendedor, nome_user) == 0) {
                             compra_chk = c;
                             found_chk = 1;
                             break;
@@ -874,7 +872,7 @@ void menuTransacoesUsuario(void) {
                 while (fgets(linha, sizeof linha, f)) {
                     Compra c;
                     sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%f;%[^;];%[^\n]", &c.id, c.titulo, c.autor, c.comprador, c.vendedor, &c.preco, c.data, c.status);
-                    if (c.id == id_escolhido && strcmp(c.vendedor, f_nome) == 0) {
+                    if (c.id == id_escolhido && strcmp(c.vendedor, nome_user) == 0) {
                         fprintf(tmp, "%d;%s;%s;%s;%s;%.2f;%s;Confirmada\n", c.id, c.titulo, c.autor, c.comprador, c.vendedor, c.preco, c.data);
                         compra_aceita = c;
                         found = 1;
@@ -910,7 +908,7 @@ void menuTransacoesUsuario(void) {
                     while (fgets(linha_chk, sizeof linha_chk, fchk)) {
                         Troca t;
                         sscanf(linha_chk, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", &t.id, t.titulo1, t.autor1, t.titulo2, t.autor2, t.user1, t.user2, t.status, t.data);
-                        if (t.id == id_escolhido && strcmp(t.user2, f_nome) == 0) {
+                        if (t.id == id_escolhido && strcmp(t.user2, nome_user) == 0) {
                             troca_chk = t;
                             found_chk = 1;
                             break;
@@ -953,7 +951,7 @@ void menuTransacoesUsuario(void) {
                 while (fgets(linha, sizeof linha, f)) {
                     Troca t;
                     sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", &t.id, t.titulo1, t.autor1, t.titulo2, t.autor2, t.user1, t.user2, t.status, t.data);
-                    if (t.id == id_escolhido && strcmp(t.user2, f_nome) == 0) {
+                    if (t.id == id_escolhido && strcmp(t.user2, nome_user) == 0) {
                         fprintf(tmp, "%d;%s;%s;%s;%s;%s;%s;Aceita;%s\n", t.id, t.titulo1, t.autor1, t.titulo2, t.autor2, t.user1, t.user2, t.data);
                         troca_aceita = t;
                         found = 1;
@@ -998,7 +996,7 @@ void menuTransacoesUsuario(void) {
                 while (fgets(linha, sizeof linha, f)) {
                     Requisicao r;
                     sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", &r.id, r.titulo, r.autor, r.requester, r.owner, r.status, r.data);
-                    if (r.id == id_escolhido && strcmp(r.owner, f_nome) == 0) {
+                    if (r.id == id_escolhido && strcmp(r.owner, nome_user) == 0) {
                         fprintf(tmp, "%d;%s;%s;%s;%s;Rejeitada;%s\n", r.id, r.titulo, r.autor, r.requester, r.owner, r.data);
                     } else {
                         fputs(linha, tmp);
@@ -1019,7 +1017,7 @@ void menuTransacoesUsuario(void) {
                 while (fgets(linha, sizeof linha, f)) {
                     Compra c;
                     sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%f;%[^;];%[^\n]", &c.id, c.titulo, c.autor, c.comprador, c.vendedor, &c.preco, c.data, c.status);
-                    if (c.id == id_escolhido && strcmp(c.vendedor, f_nome) == 0) {
+                    if (c.id == id_escolhido && strcmp(c.vendedor, nome_user) == 0) {
                         fprintf(tmp, "%d;%s;%s;%s;%s;%.2f;%s;Cancelada\n", c.id, c.titulo, c.autor, c.comprador, c.vendedor, c.preco, c.data);
                     } else {
                         fputs(linha, tmp);
@@ -1040,7 +1038,7 @@ void menuTransacoesUsuario(void) {
                 while (fgets(linha, sizeof linha, f)) {
                     Troca t;
                     sscanf(linha, "%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%[^\n]", &t.id, t.titulo1, t.autor1, t.titulo2, t.autor2, t.user1, t.user2, t.status, t.data);
-                    if (t.id == id_escolhido && strcmp(t.user2, f_nome) == 0) {
+                    if (t.id == id_escolhido && strcmp(t.user2, nome_user) == 0) {
                         fprintf(tmp, "%d;%s;%s;%s;%s;%s;%s;Rejeitada;%s\n", t.id, t.titulo1, t.autor1, t.titulo2, t.autor2, t.user1, t.user2, t.data);
                     } else {
                         fputs(linha, tmp);

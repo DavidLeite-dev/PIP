@@ -36,6 +36,7 @@ int contem_ponto_virgula(const char *texto);
 void aviso_ponto_virgula_nao_permitido(void);
 int ler_linha_sem_ponto_virgula(char *destino, size_t destinoTamanho);
 int ler_char_sem_ponto_virgula(char *destino);
+int confirmar_sn(const char *mensagem);
 
 // Leitura segura de números (evita problemas de scanf)
 int ler_int_intervalo(int *destino, int min, int max);

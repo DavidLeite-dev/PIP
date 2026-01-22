@@ -3,6 +3,6 @@
 
 #include "../user/users.h"
 
-void editarDadosPessoais(void);
+void editarDadosPessoais(UserSession *session);
 
 #endif /* EDITAR_DADOS_H */

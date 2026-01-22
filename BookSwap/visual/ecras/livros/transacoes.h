@@ -40,18 +40,18 @@ typedef struct {
 } Troca;
 
 // Funções de requisição
-void requisitarLivroEspecifico(char *titulo, char *autor, char *owner);
-void consultarMeusPedidos(void);
+void requisitarLivroEspecifico(const char *nome_user, char *titulo, char *autor, char *owner);
+void consultarMeusPedidos(const char *nome_user);
 
 // Funções de compra
-void comprarLivroEspecifico(char *titulo, char *autor, char *vendedor);
-void consultarCompras(void);
+void comprarLivroEspecifico(const char *nome_user, char *titulo, char *autor, char *vendedor);
+void consultarCompras(const char *nome_user);
 
 // Funções de troca
-void trocarLivroEspecifico(char *titulo, char *autor, char *owner);
+void trocarLivroEspecifico(const char *nome_user, char *titulo, char *autor, char *owner);
 
 // Submenu "Transações" no menu principal
-void menuTransacoesUsuario(void);
+void menuTransacoesUsuario(const char *nome_user);
 
 // Funções auxiliares
 void obterDataAtual(char *data);

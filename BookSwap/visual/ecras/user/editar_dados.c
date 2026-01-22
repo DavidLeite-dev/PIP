@@ -7,8 +7,8 @@
 #include "util.h"
 
 // Permite editar os dados da conta (nome ou password). As alterações são gravadas em users.txt.
-void editarDadosPessoais(void) {
-    if (strlen(emailLogado) == 0) {
+void editarDadosPessoais(UserSession *session) {
+    if (strlen(session->email) == 0) {
         printf("Nenhum utilizador logado. Faça login primeiro.\n");
         return;
     }
@@ -49,12 +49,7 @@ void editarDadosPessoais(void) {
             fpopeec(1);
             texto_esquerda("Novo nome: %s", novo_nome);
             linha_h_fim();
-            printf("Confirmar alteração? (S/N): ");
-            char confirma[10];
-            if (!fgets(confirma, sizeof(confirma), stdin)) {
-                opcaoInvalida();
-                return;
-            } else if (confirma[0] != 'S' && confirma[0] != 's') {
+            if (!confirmar_sn("Confirmar alteração?")) {
                 limparEcra();
                 texto_esquerda("Alteração cancelada pelo utilizador.");
                 pausar();
@@ -78,12 +73,7 @@ void editarDadosPessoais(void) {
             fpopeec(1);
             texto_esquerda("Nova password: %s", nova_password);
             linha_h_fim();
-            printf("Confirmar alteração? (S/N): ");
-            char confirma[10];
-            if (!fgets(confirma, sizeof(confirma), stdin)) {
-                opcaoInvalida();
-                return;
-            } else if (confirma[0] != 'S' && confirma[0] != 's') {
+            if (!confirmar_sn("Confirmar alteração?")) {
                 limparEcra();
                 texto_esquerda("Alteração cancelada pelo utilizador.");
                 pausar();
@@ -117,12 +107,12 @@ void editarDadosPessoais(void) {
         if (sscanf(linha, "%49[^;];%19[^\\n]", name, password) == 2 ||
             sscanf(linha, "%49s %19s", name, password) == 2) {
             garantir_utf8(name, sizeof(name));
-            if (strcmp(name, f_nome) == 0) {
+            if (strcmp(name, session->nome) == 0) {
                 // Linha do utilizador atual: aplica alteração //
                 found = 1;
                 if (opcao == 1) {
                     strcpy(name, novo_nome);
-                    strcpy(f_nome, novo_nome); // atualiza global //
+                    strcpy(session->nome, novo_nome); // atualiza session //
                 } else if (opcao == 2) {
                     /* Encriptar nova password */
                     char encryptedPass[MAX_PASSWORD * 2];

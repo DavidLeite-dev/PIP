@@ -15,11 +15,11 @@ typedef struct {
     int disponivel;  // 1 = disponível, 0 = indisponível
 } Livro;
 
-void adicionarLivro(void);
-void consultarLivros(void);
-void pesquisarLivros(void);
-void listarMeusLivros(void);
-void mostrarLivros(Livro *livros, int total);
+void adicionarLivro(const char *nome_user);
+void consultarLivros(const char *nome_user);
+void pesquisarLivros(const char *nome_user);
+void listarMeusLivros(const char *nome_user);
+void mostrarLivros(const char *nome_user, Livro *livros, int total);
 int carregar_livro_de_linha(const char *linha, Livro *livro);
 
 // Funções auxiliares para gestão de livros

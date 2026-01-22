@@ -8,19 +8,21 @@
 #define USERS_TMP  "users.tmp"
 #define USERS_BAK  "users.bak"
 
-/* Variáveis globais de autenticação */
-extern int utilizadorLogado;
-extern char f_nome[MAX_NOME];
-extern char emailLogado[MAX_EMAIL];
+/* Estrutura para sessão do utilizador */
+typedef struct {
+    int logado;  /* 0=não logado, 1=logado, -1=sair */
+    char nome[MAX_NOME];
+    char email[MAX_EMAIL];
+} UserSession;
 
 /* Operações sobre o ficheiro de utilizadores */
 void normalizeUsersFile(void);
 
 /* Autenticação / gestão de utilizadores */
-int login(void);
-void logout(void);
-void atualizarNomeLogado(void);
-void registerUser(void);
+int login(UserSession *session);
+void logout(UserSession *session);
+void atualizarNomeLogado(UserSession *session);
+void registerUser(UserSession *session);
 
 /* Login e Registo */
 /* Encriptação de passwords */

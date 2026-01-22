@@ -1,1 +1,2 @@
 1;Operating Systems;Tanenbaum;O Primo Basílio;Eça de Queirós;Bruno Silva;Carla Mendes;Pendente;19/01/2026
+2;Programar é fixe;Paulo Coelho;Programar é fixe;Paulo Coelho;Marta Martinho;Marta Martinho;Aceita;21/01/2026

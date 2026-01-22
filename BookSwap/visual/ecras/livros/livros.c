@@ -7,6 +7,19 @@
 #include "transacoes.h"
 #include "../user/users.h"
 
+#define MAX_SELECAO_OPCOES 200
+
+typedef struct {
+    int id;
+    char nome[128];
+} ItemSelecao;
+
+typedef int (*ObterIdFunc)(const char *);
+
+typedef struct {
+    const char *cabecalho;
+} ContextoSelecao;
+
 static void truncar_titulo(const char *titulo, char *dest, size_t destSize) {
     if (!dest || destSize == 0) return;
     if (!titulo) {
@@ -112,13 +125,6 @@ static void header_admin_livros(int paginaAtual, int totalPaginas, void *context
     linha_h_meio();
 }
 
-#define MAX_SELECAO_OPCOES 200
-
-typedef struct {
-    int id;
-    char nome[128];
-} ItemSelecao;
-
 static int carregar_lista_opcoes(const char *arquivo, ItemSelecao itens[], int capacidade) {
     if (!arquivo || !itens || capacidade <= 0) return 0;
 
@@ -145,7 +151,23 @@ static int carregar_lista_opcoes(const char *arquivo, ItemSelecao itens[], int c
     return total;
 }
 
-typedef int (*ObterIdFunc)(const char *);
+static void header_selecionar_item(int paginaAtual, int totalPaginas, void *context) {
+    ContextoSelecao *ctx = (ContextoSelecao *)context;
+    linha_h_topo();
+    texto_centrado(ctx->cabecalho);
+    linha_h_meio();
+    texto_centrado("PÁGINA %d de %d", paginaAtual, totalPaginas);
+    linha_h_meio();
+}
+
+static int formatar_item_selecao(char *buffer, size_t bufferSize, int index, void *item, void *context) {
+    (void)index;
+    (void)context;
+    if (!buffer || bufferSize == 0 || !item) return 0;
+    ItemSelecao *it = (ItemSelecao *)item;
+    snprintf(buffer, bufferSize, "%s", it->nome);
+    return 0;
+}
 
 static int selecionar_item_por_ficheiro(const char *arquivo, const char *cabecalho, const char *descricao, ObterIdFunc obterId, char *destino, size_t destinoTamanho, int *destId, int permitirAdicionarNovo) {
     if (!arquivo || !cabecalho || !descricao || !obterId || !destino || destinoTamanho == 0 || !destId) return 0;
@@ -153,54 +175,51 @@ static int selecionar_item_por_ficheiro(const char *arquivo, const char *cabecal
     ItemSelecao itens[MAX_SELECAO_OPCOES];
     int total = carregar_lista_opcoes(arquivo, itens, MAX_SELECAO_OPCOES);
 
-    while (1) {
+    if (total == 0 && !permitirAdicionarNovo) {
         limparEcra();
         linha_h_topo();
         texto_centrado(cabecalho);
         linha_h_meio();
-
-        if (total == 0) {
-            texto_esquerda(" Ainda não há %s cadastrados.", descricao);
-        } else {
-            for (int i = 0; i < total; i++) {
-                texto_esquerda("  %2d. %s", i + 1, itens[i].nome);
-            }
-        }
-
-        if (permitirAdicionarNovo) {
-            texto_esquerda("  0. Adicionar novo %s", descricao);
-        } else {
-            texto_esquerda("  0. Voltar");
-        }
+        texto_esquerda(" Ainda não há %s cadastrados.", descricao);
         linha_h_fim();
+        pausar();
+        return 0;
+    }
 
-        printf("\nEscolha uma opção (0-%d): ", total);
-        int opcao;
-        if (!ler_int_intervalo(&opcao, 0, total)) {
-            opcaoInvalida();
-            continue;
+    while (1) {
+        int escolha = 0;
+        
+        if (total > 0) {
+            ContextoSelecao ctx = {cabecalho};
+            escolha = menu_paginar_itens(itens, total, 10, sizeof(ItemSelecao), formatar_item_selecao, header_selecionar_item, &ctx);
         }
 
-        if (opcao == 0) {
+        if (escolha == 0) {
             if (!permitirAdicionarNovo) {
                 return 0;
             }
+            
+            limparEcra();
+            linha_h_topo();
+            texto_centrado(cabecalho);
+            linha_h_meio();
+            texto_esquerda("Adicionar novo %s", descricao);
+            linha_h_meio();
+            
             char entrada[128];
-            printf("\nDigite o nome do novo %s: ", descricao);
-            if (!fgets(entrada, sizeof(entrada), stdin)) {
-                opcaoInvalida();
-                continue;
-            }
-            entrada[strcspn(entrada, "\n")] = '\0';
-            if (entrada[0] == '\0') {
-                opcaoInvalida();
-                continue;
-            }
-            if (contem_ponto_virgula(entrada)) {
+            printf("║ Digite o nome: ");
+            if (!ler_linha_sem_ponto_virgula(entrada, sizeof(entrada))) {
                 aviso_ponto_virgula_nao_permitido();
                 pausar();
                 continue;
             }
+            
+            if (entrada[0] == '\0') {
+                opcaoInvalida();
+                pausar();
+                continue;
+            }
+            
             garantir_utf8(entrada, sizeof(entrada));
             int novo_id = obterId(entrada);
             if (novo_id <= 0) {
@@ -215,18 +234,19 @@ static int selecionar_item_por_ficheiro(const char *arquivo, const char *cabecal
             return 1;
         }
 
-        if (opcao >= 1 && opcao <= total) {
-            *destId = itens[opcao - 1].id;
-            strncpy(destino, itens[opcao - 1].nome, destinoTamanho - 1);
+        if (escolha >= 1 && escolha <= total) {
+            *destId = itens[escolha - 1].id;
+            strncpy(destino, itens[escolha - 1].nome, destinoTamanho - 1);
             destino[destinoTamanho - 1] = '\0';
             return 1;
         }
 
         opcaoInvalida();
+        pausar();
     }
 }
 
-void adicionarLivro() {
+void adicionarLivro(const char *nome_user) {
     Livro livro;
     FILE *fp = fopen("livros.txt", "a");
     if (!fp) {
@@ -261,7 +281,7 @@ void adicionarLivro() {
         return;
     }
 
-    strcpy(livro.owner, f_nome);
+    strcpy(livro.owner, nome_user);
 
     limparEcra();
     linha_h_topo();
@@ -305,17 +325,8 @@ void adicionarLivro() {
     texto_esquerda(" Condição: %s", livro.condicao);
     linha_h_meio();
     livro.disponivel = 1;  // Livro disponível por padrão ao adicionar
-    printf("║ Confirmar adição do livro? (s/n): ");
-    char confirmar;
-    if (!ler_char_sem_ponto_virgula(&confirmar)) {
-        fclose(fp);
-        aviso_ponto_virgula_nao_permitido();
-        pausar();
-        return;
-    }
-    fpopeec(1);
-    texto_esquerda(" Confirmar adição do livro? (s/n): %c", confirmar);
-    if (confirmar == 's' || confirmar == 'S') {
+    
+    if (confirmar_sn("║ Confirmar adição do livro?")) {
         fprintf(fp, "%s;%d;%s;%d;%d;%d\n", livro.titulo, livro.autor_id, livro.owner, livro.categoria_id, livro.condicao_id, livro.disponivel);
         fclose(fp);
         linha_h_meio();
@@ -332,7 +343,7 @@ void adicionarLivro() {
         return;
     }
 }
-void consultarLivros() {
+void consultarLivros(const char *nome_user) {
     char opcao[10];
     linha_h_topo();
     texto_centrado("CONSULTAR CATÁLOGO DE LIVROS");
@@ -346,7 +357,7 @@ void consultarLivros() {
     limparEcra();
 
     if (opcao[0] == '1') {
-        pesquisarLivros();
+        pesquisarLivros(nome_user);
         return;
     } else if (opcao[0] == '2') {
         // Continua para listar todos os livros
@@ -373,7 +384,7 @@ void consultarLivros() {
         return;
     }
 
-    // Ler todos os livros do ficheiro
+    // Ler todos os livros do ficheiro (exceto os do próprio utilizador)
     while (fgets(linha, sizeof(linha), fp)) {
         if (total == capacidade) {
             capacidade *= 2;
@@ -384,8 +395,13 @@ void consultarLivros() {
                 return;
             }
         }
-        if (carregar_livro_de_linha(linha, &livros[total])) {
-            total++;
+        Livro livro_temp;
+        if (carregar_livro_de_linha(linha, &livro_temp)) {
+            // Não mostrar livros do próprio utilizador
+            if (strcmp(livro_temp.owner, nome_user) != 0) {
+                livros[total] = livro_temp;
+                total++;
+            }
         }
     }
     fclose(fp);
@@ -398,11 +414,11 @@ void consultarLivros() {
         return;
     }
 
-    mostrarLivros(livros, total);
+    mostrarLivros(nome_user, livros, total);
     free(livros);
 }
 
-void pesquisarLivros() {
+void pesquisarLivros(const char *nome_user) {
     FILE *fp = fopen("livros.txt", "r");
     if (!fp) {
         printf("Erro ao abrir o ficheiro livros.txt\n");
@@ -610,16 +626,19 @@ void pesquisarLivros() {
         for (int j = 0; query_lower[j]; j++) query_lower[j] = (char)tolower((unsigned char)query_lower[j]);
 
         if (strstr(campo_lower, query_lower)) {
-            if (total_filtrados == cap_filtrados) {
-                cap_filtrados *= 2;
-                filtrados = realloc(filtrados, (size_t)cap_filtrados * sizeof(Livro));
-                if (!filtrados) {
-                    printf("Erro de memoria.\n");
-                    free(livros);
-                    return;
+            // Não mostrar livros do próprio utilizador
+            if (strcmp(livros[i].owner, nome_user) != 0) {
+                if (total_filtrados == cap_filtrados) {
+                    cap_filtrados *= 2;
+                    filtrados = realloc(filtrados, (size_t)cap_filtrados * sizeof(Livro));
+                    if (!filtrados) {
+                        printf("Erro de memoria.\n");
+                        free(livros);
+                        return;
+                    }
                 }
+                filtrados[total_filtrados++] = livros[i];
             }
-            filtrados[total_filtrados++] = livros[i];
         }
     }
     free(livros);
@@ -635,11 +654,11 @@ void pesquisarLivros() {
     }
 
     limparEcra();
-    mostrarLivros(filtrados, total_filtrados);
+    mostrarLivros(nome_user, filtrados, total_filtrados);
     free(filtrados);
 }
 
-void listarMeusLivros(void) {
+void listarMeusLivros(const char *nome_user) {
     FILE *fp = fopen("livros.txt", "r");
     if (!fp) {
         printf("Erro ao abrir o ficheiro livros.txt\n");
@@ -691,7 +710,7 @@ void listarMeusLivros(void) {
     int total_meus = 0, cap_meus = 10;
 
     for (int i = 0; i < total; i++) {
-        if (strcmp(livros[i].owner, f_nome) == 0) {
+        if (strcmp(livros[i].owner, nome_user) == 0) {
             if (total_meus == cap_meus) {
                 cap_meus *= 2;
                 Livro *tmp = realloc(meus, (size_t)cap_meus * sizeof(Livro));
@@ -809,7 +828,7 @@ void listarMeusLivros(void) {
         int pendencias = 0;
         if (reqs) {
             for (int r = 0; r < total_req; r++) {
-                if (strcmp(reqs[r].owner, f_nome) == 0 && strcmp(reqs[r].titulo, meus[idx].titulo) == 0) {
+                if (strcmp(reqs[r].owner, nome_user) == 0 && strcmp(reqs[r].titulo, meus[idx].titulo) == 0) {
                     if (strcmp(reqs[r].status, "Pendente") == 0) {
                         texto_esquerda(" Pendente: Requisição de %s", reqs[r].requester);
                         pendencias++;
@@ -821,7 +840,7 @@ void listarMeusLivros(void) {
         }
         if (comps) {
             for (int c = 0; c < total_comp; c++) {
-                if (strcmp(comps[c].vendedor, f_nome) == 0 && strcmp(comps[c].titulo, meus[idx].titulo) == 0) {
+                if (strcmp(comps[c].vendedor, nome_user) == 0 && strcmp(comps[c].titulo, meus[idx].titulo) == 0) {
                     if (strcmp(comps[c].status, "Pendente") == 0) {
                         texto_esquerda(" Pendente: Compra de %s", comps[c].comprador);
                         pendencias++;
@@ -834,9 +853,9 @@ void listarMeusLivros(void) {
         if (trocas) {
             for (int t = 0; t < total_trocas; t++) {
                 int isMeu = 0; int souUser1 = 0;
-                if (strcmp(trocas[t].user1, f_nome) == 0 && strcmp(trocas[t].titulo1, meus[idx].titulo) == 0) {
+                if (strcmp(trocas[t].user1, nome_user) == 0 && strcmp(trocas[t].titulo1, meus[idx].titulo) == 0) {
                     isMeu = 1; souUser1 = 1;
-                } else if (strcmp(trocas[t].user2, f_nome) == 0 && strcmp(trocas[t].titulo2, meus[idx].titulo) == 0) {
+                } else if (strcmp(trocas[t].user2, nome_user) == 0 && strcmp(trocas[t].titulo2, meus[idx].titulo) == 0) {
                     isMeu = 1; souUser1 = 0;
                 }
                 if (isMeu) {
@@ -897,13 +916,7 @@ void listarMeusLivros(void) {
         }
 
         if (opcao[0] == '2') {
-            char confirmar[8];
-            printf("\nTem a certeza que quer eliminar este livro? (s/n): ");
-            if (!fgets(confirmar, sizeof(confirmar), stdin)) {
-                continue;
-            }
-
-            if (confirmar[0] != 's' && confirmar[0] != 'S') {
+            if (!confirmar_sn("\nTem a certeza que quer eliminar este livro?")) {
                 limparEcra();
                 continue;
             }
@@ -948,7 +961,7 @@ void listarMeusLivros(void) {
     free(trocas);
 }
 
-void mostrarLivros(Livro *livros, int total) {
+void mostrarLivros(const char *nome_user, Livro *livros, int total) {
     char opcao[10];
     while (1) {
         int escolha = menu_paginar_itens(livros, total, 10, sizeof(Livro), formatar_livro_catalogo, header_catalogo_livros, NULL);
@@ -984,13 +997,13 @@ void mostrarLivros(Livro *livros, int total) {
         if (livros[idx].disponivel) {
             if (opcao[0] == '1') {
                 limparEcra();
-                requisitarLivroEspecifico(livros[idx].titulo, livros[idx].autor, livros[idx].owner);
+                requisitarLivroEspecifico(nome_user, livros[idx].titulo, livros[idx].autor, livros[idx].owner);
             } else if (opcao[0] == '2') {
                 limparEcra();
-                comprarLivroEspecifico(livros[idx].titulo, livros[idx].autor, livros[idx].owner);
+                comprarLivroEspecifico(nome_user, livros[idx].titulo, livros[idx].autor, livros[idx].owner);
             } else if (opcao[0] == '3') {
                 limparEcra();
-                trocarLivroEspecifico(livros[idx].titulo, livros[idx].autor, livros[idx].owner);
+                trocarLivroEspecifico(nome_user, livros[idx].titulo, livros[idx].autor, livros[idx].owner);
             }
         }
         limparEcra();
@@ -1235,17 +1248,9 @@ void menuAdminLivros(void) {
                 texto_esquerda("Autor: %s", livros[idx].autor);
                 texto_esquerda("Dono: %s", livros[idx].owner);
                 linha_h_meio();
-                texto_esquerda("Tem a certeza? (s/n)");
                 linha_h_fim();
-                printf("║ Opção: ");
-                char confirma;
-                if (!ler_char_sem_ponto_virgula(&confirma)) {
-                    aviso_ponto_virgula_nao_permitido();
-                    pausar();
-                    continue;
-                }
-
-                if (confirma == 's' || confirma == 'S') {
+                
+                if (confirmar_sn("║ Tem a certeza?")) {
                     int ok = removerLivroDoFicheiro(livros[idx].titulo, livros[idx].autor, livros[idx].owner);
                     limparEcra();
                     linha_h_topo();

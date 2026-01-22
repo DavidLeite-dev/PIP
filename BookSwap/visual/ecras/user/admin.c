@@ -55,14 +55,14 @@ int isAdmin(const char *nome_utilizador) {
 }
 
 // Painel de Administração Principal
-void painelAdmin(void) {
+void painelAdmin(const char *nome_user) {
     char opcao[10];
     while (1) {
         limparEcra();
         linha_h_topo();
         texto_centrado("PAINEL DE ADMINISTRAÇÃO");
         linha_h_meio();
-        texto_esquerda("Admin: %s", f_nome);
+        texto_esquerda("Admin: %s", nome_user);
         linha_h_meio();
         texto_esquerda(" 1. Gerir livros");
         texto_esquerda(" 2. Ver todas as transações do sistema");
@@ -407,18 +407,9 @@ void adminGerirUtilizadores(void) {
             linha_h_meio();
             texto_esquerda("Utilizador: %s", usuarios[idx].nome);
             linha_h_meio();
-            texto_esquerda("Tem a certeza? (s/n)");
             linha_h_fim();
-            printf("║ Opção: ");
-            char confirma;
-            if (!ler_char_sem_ponto_virgula(&confirma)) {
-                free(usuarios);
-                aviso_ponto_virgula_nao_permitido();
-                pausar();
-                continue;
-            }
             
-            if (confirma == 'S' || confirma == 's') {
+            if (confirmar_sn("║ Tem a certeza?")) {
                 FILE *tmp = fopen("users.tmp", "w");
                 if (!tmp) {
                     printf("Erro ao criar ficheiro temporário.\n");

@@ -48,3 +48,4 @@ A Culpa é das Estrelas;29;João Teixeira;5;2;1
 Vidas Secas;30;João Teixeira;3;3;1
 Capitães da Areia;31;João Teixeira;3;1;1
 The Clean Coder;1;João Teixeira;1;2;1
+Programar é fixe;10;Marta Martinho;4;2;0

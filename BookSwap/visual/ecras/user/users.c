@@ -5,16 +5,10 @@
 #include "../menu/menu.h" /* Para mostrarMenu() */
 #include "util.h"
 
-/* Variáveis globais de autenticação (definições) */
-int utilizadorLogado = 0;
-char f_nome[MAX_NOME] = "";
-char emailLogado[MAX_EMAIL] = "";
-
-/* Chave para encriptação XOR simples */
 #define ENCRYPT_KEY "IPCA2025SecureKey"
 
 /* Função para encriptar/desencriptar password usando XOR */
-void encryptPassword(const char *input, char *output) {
+static void encryptPassword(const char *input, char *output) {
     size_t keyLen = strlen(ENCRYPT_KEY);
     size_t inputLen = strlen(input);
     
@@ -25,7 +19,7 @@ void encryptPassword(const char *input, char *output) {
 }
 
 /* Função para converter bytes para hex */
-void toHex(const char *input, char *output) {
+static void toHex(const char *input, char *output) {
     const char hexChars[] = "0123456789ABCDEF";
     size_t len = strlen(input);
     
@@ -38,7 +32,7 @@ void toHex(const char *input, char *output) {
 }
 
 /* Função para converter hex para bytes */
-void fromHex(const char *input, char *output) {
+static void fromHex(const char *input, char *output) {
     size_t len = strlen(input);
     
     for (size_t i = 0; i + 1 < len; i += 2) {
@@ -127,7 +121,7 @@ void normalizeUsersFile(void) {
 }
 
 /* Verifica se o email existe no ficheiro IPCAlunos.txt */
-int verificarAlunoIPCA(const char *email) {
+static int verificarAlunoIPCA(const char *email) {
     FILE *f = fopen("IPCAlunos.txt", "r");
     if (f == NULL) {
         printf("Aviso: Ficheiro IPCAlunos.txt não encontrado.\n");
@@ -150,7 +144,7 @@ int verificarAlunoIPCA(const char *email) {
 }
 
 /* Verifica se o email/nome está no ficheiro admin.txt e retorna 1 se for admin */
-int verificarAdmin(const char *email_ou_nome, const char *password) {
+static int verificarAdmin(const char *email_ou_nome, const char *password) {
     FILE *fa = fopen("admin.txt", "r");
     if (!fa) return 0;
     
@@ -183,7 +177,7 @@ int verificarAdmin(const char *email_ou_nome, const char *password) {
 
 /* --- Implementação do login/logout/registo --- */
 
-int login(void) {
+int login(UserSession *session) {
     limparEcra();
     
     char email[MAX_EMAIL], password[MAX_PASSWORD], nome[MAX_NOME];
@@ -217,9 +211,9 @@ int login(void) {
                 
                 if (sscanf(linha, "%[^;];%[^;];%[^\n]", nome_admin, email_admin, pass_admin) == 3) {
                     if (strcmp(email, email_admin) == 0 || strcmp(email, nome_admin) == 0) {
-                        utilizadorLogado = 1;
-                        strcpy(emailLogado, email_admin);
-                        strcpy(f_nome, nome_admin);
+                        session->logado = 1;
+                        strcpy(session->email, email_admin);
+                        strcpy(session->nome, nome_admin);
                         fclose(fa);
                         
                         limparEcra();
@@ -275,9 +269,9 @@ int login(void) {
                     decryptPasswordHex(temp_password, decryptedPass);
                     
                     if (strcmp(password, decryptedPass) == 0) {
-                        utilizadorLogado = 1;
-                        strcpy(emailLogado, temp_email);
-                        strcpy(f_nome, temp_nome);
+                        session->logado = 1;
+                        strcpy(session->email, temp_email);
+                        strcpy(session->nome, temp_nome);
                         limparEcra();
                         printf("╔════════════════════════════════════════════════════╗\n");
                         printf("║            LOGIN BEM SUCEDIDO                      ║\n");
@@ -336,9 +330,9 @@ int login(void) {
         fprintf(f, "%s;%s;%s\n", nome, email, encryptedPass);
         fclose(f);
         
-        utilizadorLogado = 1;
-        strcpy(emailLogado, email);
-        strcpy(f_nome, nome);
+        session->logado = 1;
+        strcpy(session->email, email);
+        strcpy(session->nome, nome);
         
         limparEcra();
         printf("╔════════════════════════════════════════════════════╗\n");
@@ -357,15 +351,16 @@ int login(void) {
     return 0;
 }
 
-void logout(void) {
+void logout(UserSession *session) {
     limparEcra();
-    utilizadorLogado = 0;
-    strcpy(f_nome, "");
+    session->logado = 0;
+    strcpy(session->nome, "");
+    strcpy(session->email, "");
     printf("Logout efetuado com sucesso.\n");
 }
 
-void atualizarNomeLogado(void) {
-    if (strlen(emailLogado) == 0) return;
+void atualizarNomeLogado(UserSession *session) {
+    if (strlen(session->email) == 0) return;
 
     FILE *f = fopen(USERS_FILE, "r");
     if (f == NULL) return;
@@ -380,8 +375,8 @@ void atualizarNomeLogado(void) {
             sscanf(linha, "%49s %49s %19s", file_name, file_email, file_password) == 3) {
             garantir_utf8(file_name, sizeof(file_name));
             garantir_utf8(file_email, sizeof(file_email));
-            if (strcmp(file_email, emailLogado) == 0) {
-                strcpy(f_nome, file_name);
+            if (strcmp(file_email, session->email) == 0) {
+                strcpy(session->nome, file_name);
                 break;
             }
         }
@@ -390,7 +385,7 @@ void atualizarNomeLogado(void) {
     fclose(f);
 }
 
-void registerUser(void) {
+void registerUser(UserSession *session) {
     limparEcra();
     
     char email[MAX_EMAIL];
@@ -464,9 +459,9 @@ void registerUser(void) {
     printf("\nUtilizador registado com sucesso!\n");
     printf("Login automático efetuado. Bem-vindo, %s!\n", nome);
 
-    utilizadorLogado = 1;
-    strcpy(emailLogado, email);
-    strcpy(f_nome, nome);
+    session->logado = 1;
+    strcpy(session->email, email);
+    strcpy(session->nome, nome);
 
-    menu_principal(f_nome);  // direto para menu principal
+    menu_principal(session);  // direto para menu principal
 }

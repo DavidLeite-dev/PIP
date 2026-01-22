@@ -10,6 +10,8 @@
 #include <ctype.h>
 #include <limits.h>
 
+#define WIDTH 60
+
 void limparBuffer(void) {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
@@ -115,7 +117,30 @@ int ler_float_intervalo(float *destino, float min, float max) {
     return 1;
 }
 
-#define WIDTH 60
+int confirmar_sn(const char *mensagem) {
+    char input[10];
+    while (1) {
+        printf("%s (S/N): ", mensagem);
+        if (!fgets(input, sizeof(input), stdin)) {
+            continue;
+        }
+        input[strcspn(input, "\r\n")] = '\0';
+        
+        if (input[0] == '\0') {
+            opcaoInvalida();
+            continue;
+        }
+        
+        char c = (char)tolower((unsigned char)input[0]);
+        if (c == 's' && input[1] == '\0') {
+            return 1;
+        } else if (c == 'n' && input[1] == '\0') {
+            return 0;
+        } else {
+            opcaoInvalida();
+        }
+    }
+}
 
 void linha_h_topo() {
     printf("╔");
